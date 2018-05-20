@@ -1,0 +1,1 @@
+-- Copyright © 2018 Allen Faure. See LICENSE.md for details.

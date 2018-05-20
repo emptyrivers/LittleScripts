@@ -1,8 +1,31 @@
-#  Copyright (c) 2017 by Rivers. See ..\LICENSE.md for details
+#  Copyright © 2018 Allen Faure. See LICENSE.md for details.
 
 ## Interface: 70300
 ## Title: LittleScripts
 ## SavedVariables: __littlesaves
-## Notes: WeakAuras extension
+## Notes: WeakAuras extension for specialization specific tools.
+## OptionalDeps: WeakAuras
 
+init.lua
+load.lua
+integration.lua
+util.lua
 
+# generic scripts
+generic/comms.lua
+generic/groupspecs.lua
+generic/groupcds.lua
+
+# death knight
+# demon hunter
+# druid
+# hunter
+# mage
+# monk
+monk/normalizedStagger.lua
+# paladin
+# priest
+# rogue
+# shaman
+# warlock
+# warrior
