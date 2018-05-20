@@ -12,7 +12,6 @@ integration.lua
 util.lua
 
 # generic scripts
-generic/comms.lua
 generic/groupspecs.lua
 generic/groupcds.lua
 
@@ -22,7 +21,8 @@ generic/groupcds.lua
 # hunter
 # mage
 # monk
-monk/normalizedStagger.lua
+monk/stagger.lua
+monk/expelharm.lua
 # paladin
 # priest
 # rogue
