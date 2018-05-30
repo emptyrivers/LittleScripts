@@ -7,7 +7,6 @@
 ## OptionalDeps: WeakAuras
 
 init.lua
-load.lua
 integration.lua
 util.lua
 

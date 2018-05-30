@@ -139,4 +139,4 @@ stagger.api = {
    end,
 }
 
-LittleScripts:AddModule('stagger', stagger, LittleScripts:GetCategories())
+LittleScripts:AddModule('stagger', stagger, 268)
