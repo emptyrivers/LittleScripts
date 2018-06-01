@@ -3,9 +3,9 @@
 --this holds code for normalized stagger
 
 local api = {}
-local util = LittleScripts.util
-
-local addToPool, getVal = util.makeTempAdder()
+local util = LittleScripts.__modules.util
+local addToPool, getVal = util.api.makeTempAdder()
+local HexToRGBA = util.api.HexToRGBA
 
 local staggerDebuffs = {[124275] = true, [124274] = true, [124273] = true,}
 
@@ -23,15 +23,15 @@ end
 local function getColor()
    local perc = getTick()/UnitHealthMax'player'
    if perc <= .015 then
-     return util.HexToRGBA('a9a9a9')
+     return HexToRGBA('a9a9a9')
    elseif perc <= .03 then
-     return util.HexToRGBA('e3df24')
+     return HexToRGBA('e3df24')
    elseif perc <= .05 then
-     return util.HexToRGBA('e39723')
+     return HexToRGBA('e39723')
    elseif perc <= .1 then
-     return util.HexToRGBA('fd1300')
+     return HexToRGBA('fd1300')
    else
-     return util.HexToRGBA('fd00b2')
+     return HexToRGBA('fd00b2')
    end
  end
 
@@ -138,5 +138,26 @@ stagger.api = {
       return stagger.pauseDuration, stagger.pauseExpiry
    end,
 }
+
+local normalstagger = LittleScripts:DataTemplate("normalized stagger", "aurabar", 1)
+normalstagger.trigger = {
+   type = "custom",
+   custom_type = "status",
+   custom = "function() return true end",
+   customDuration = [[
+function()
+   return LittleScripts.GetNormalizedStagger(), UnitHealthMax('player'), true
+end
+]],
+   check = "update",
+}
+
+
+
+stagger.auras = {
+   normalstagger,
+}
+
+
 
 LittleScripts:AddModule('stagger', stagger, 268)

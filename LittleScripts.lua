@@ -3,15 +3,18 @@
 -- this part defines the framework of the addon.
 
 
-LittleScripts = CreateFrame("FRAME")
+LittleScripts = {}
 local Littlescripts = Littlescripts
 local function noop() end
+
 function LittleScripts:debug(msg, lvl, api)
    lvl, api = lvl or 2, api or ConsoleAddMessage
    if lvl >= self.debuglvl then
       return api(msg)
    end
 end
+
+LittleScripts.loaded = false
 
 LittleScripts.debuglvl = 1
 
@@ -67,6 +70,7 @@ end
 LittleScripts.__categories = __categories
 
 LittleScripts.__modules = {}
+LittleScripts.__api = {}
 
 function LittleScripts:AddModule(name, module, category, overrideAPI)
    -- ensure sanity
@@ -81,11 +85,11 @@ function LittleScripts:AddModule(name, module, category, overrideAPI)
    elseif module.Init ~= nil and type(module.Init) ~= 'function' then
       return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Init).." for Init method.", 4, error)
    elseif module.Enable ~= nil and type(module.Enable) ~= 'function' then
-      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Init).." for Enable method.", 4, error)
+      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Enable).." for Enable method.", 4, error)
    elseif module.Disable ~= nil and type(module.Disable) ~= 'function' then
-      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Init).." for Disable method.", 4, error)
-   elseif type(module.scripts) ~= 'table' then
-      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Init).." for scripts attribute.", 4, error)
+      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.Disable).." for Disable method.", 4, error)
+   elseif module.scripts and type(module.scripts) ~= 'table' then
+      return self:debug("LittleScripts: "..name.." has invalid type "..type(module.scripts).." for scripts attribute.", 4, error)
    end
    for _, method in pairs{"Init", "Enable", "Disable"} do
       module[method] = module[method] or noop
@@ -113,13 +117,13 @@ function LittleScripts:AddModule(name, module, category, overrideAPI)
       end
    end
    if module.api then
-      for apiname, func in pairs(module.api) do
-         if overrideAPI or not self[apiname] then
-            if self[apiname] then
+      for apiname in pairs(module.api) do
+         if overrideAPI or not self.__api[apiname] then
+            if self.__api[apiname] then
                self:debug("Littlescripts - Warning: module "..name.." has added API method "
                           ..apiname.." which already exists. This may produce unpredictable results.")
             end
-            self[apiname] = func
+            self.__api[apiname] = module
          end
       end
    end
@@ -131,8 +135,21 @@ end
 function LittleScripts:LoadModule(module)
    if module.loaded then return end
    module:Init()
-   module.loaded = true
+   for name, func in pairs(module.api) do
+      self[name] = func
+   end
 end
+
+setmetatable(LittleScripts, { -- don't actually load module until something requests api from module
+   __index = function(self, apiname)
+      if not self.loaded then return noop end
+      if self.__api[apiname] then
+         self:LoadModule(self.__api[apiname])
+      end
+      return rawget(self,apiname)
+   end
+})
+
 
 function LittleScripts:GetCategories(id, includeGeneric)
    -- returns spec, class, and (if requested) role categories, as well as generic category
@@ -142,9 +159,9 @@ function LittleScripts:GetCategories(id, includeGeneric)
       return {class = classID, spec = specID, role = role, generic = includeGeneric and "GENERAL" or nil}
    elseif type(id) == 'number' then 
       if not GetClassInfo(id) then -- specID, probably
-         local _, classID, _, _, role = GetSpecializationInfoByID(id)
-         if not classID then return end
-         return {class = classID, spec = id, role = role, generic = includeGeneric  and "GENERAL" or nil}
+         local _, specname, _, _, role = GetSpecializationInfoByID(id)
+         if not specname then return end
+         return {class = UnitClass'player', spec = id, role = role, generic = includeGeneric  and "GENERAL" or nil}
       else  -- classID
          local toReturn = {
             class = classID,
@@ -193,19 +210,18 @@ function LittleScripts:GetScripts(categories, includeFrame)
    return scripts
 end
 
-LittleScripts:RegisterEvent("ADDON_LOADED")
-LittleScripts:RegisterEvent("PLAYER_LOGIN")
-LittleScripts:SetScript("OnEvent",
+local loadframe = CreateFrame("FRAME")
+loadframe:RegisterEvent("ADDON_LOADED")
+loadframe:RegisterEvent("PLAYER_LOGIN")
+loadframe:SetScript("OnEvent",
    function(self,event,arg,...)
       if event == "PLAYER_LOGIN" then
-         self:RegisterCategories(self:GetCategories(nil, true))
+         LittleScripts:RegisterCategories(LittleScripts:GetCategories(nil, true))
       elseif event == "ADDON_LOADED" and arg == "LittleScripts" then
          --call init functions for each module, replace noop functions
          __littlesaves = __littlesaves  or {}
-         for name, module in pairs(LittleScripts.__modules) do
-            self:LoadModule(module)
-         end
+         LittleScripts.__saveddata = __littlesaves
+         LittleScripts.loaded = true
       end
-      self.loaded = true
    end
 )

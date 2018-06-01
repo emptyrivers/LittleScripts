@@ -39,8 +39,8 @@ end
 
 
 function LittleScripts:DataTemplate(name, regionType, numTriggers)
-   local toReturn = {
-      id = "name",
+   return {
+      id = name,
       regionType = regionType or "icon",
       numTriggers = numTriggers or 1,
       additional_triggers = numTriggers and numTriggers > 1 and {} or nil,
@@ -56,6 +56,7 @@ function LittleScripts:DataTemplate(name, regionType, numTriggers)
       },
       load = {},
       conditions = {},
+      trigger = {},
       untrigger = {},
       activeTriggerMode = WeakAuras.trigger_modes.first_active,
       disjunctive = "all",

@@ -6,13 +6,15 @@
 ## Notes: WeakAuras extension for specialization specific tools.
 ## OptionalDeps: WeakAuras
 
-init.lua
+LittleScripts.lua
 integration.lua
 util.lua
 
 # generic scripts
 generic/groupspecs.lua
 generic/groupcds.lua
+generic/unitsearcher.lua
+
 
 # death knight
 # demon hunter
