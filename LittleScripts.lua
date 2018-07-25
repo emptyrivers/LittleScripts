@@ -2,9 +2,8 @@
 
 -- this part defines the framework of the addon.
 
+local Littlescripts = LibStub:NewLibrary("LittleScripts", 1)
 
-LittleScripts = {}
-local Littlescripts = Littlescripts
 local function noop() end
 
 function LittleScripts:debug(msg, lvl, api)
